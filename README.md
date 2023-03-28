@@ -159,6 +159,7 @@ Using the `-pre` argument, we can easily chain together compilation of dependenc
 
         # add Windows-specific library search path
         # this is where we will find glfw3.lib
+        -L../lib/windows
     }
 
 }*/

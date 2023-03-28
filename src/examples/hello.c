@@ -4,14 +4,12 @@
     -std=c11
     -Wall -Werror
     -if (--target=[darwin]) { # compiling for macOS
-        -o ../bin/macos/hello
+        -pre { mkdir -p ../../bin/macos }
+        -o ../../bin/macos/hello
     }
     -if (--target=[windows]) { # compiling for Windows
-        -o ../bin/windows/hello.exe
-    }
-    -if (--target=[msvc] && -fsanitize=address) {
-        # lld-link: error: /INFERASANLIBS is not allowed in .drectve
-        -D_DISABLE_VECTOR_ANNOTATION
+        -pre { mkdir -p ../../bin/windows }
+        -o ../../bin/windows/hello.exe
     }
 }*/
 
