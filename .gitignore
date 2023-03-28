@@ -1,4 +1,5 @@
 bin/*
 lib/*
+src/*.exe
 
 .DS_Store

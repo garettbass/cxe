@@ -180,7 +180,6 @@ namespace cxe {
         void parse() {
             using namespace ::cxe::scan;
             verify(_cli_toks.size());
-            verify(_src_toks.size());
 
             append(ctx.compiler_path, _compile);
 
@@ -190,6 +189,7 @@ namespace cxe {
                 while (itr) parse_arg(itr, _compile);
             }
 
+            if (_src_toks.size())
             if (tokitr itr = _src_toks) {
                 while (itr) parse_arg(itr, _compile);
             }
