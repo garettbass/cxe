@@ -276,6 +276,7 @@ int main(const int argc, const char* argv[], const char* envp[]) {
     };
 
     environment::variable CXE("CXE", cxe_path);
+    environment::variable CXE_SRC_NAME("CXE_SRC_NAME", src_name);
 
     buffer<char> src_dir_buffer;
     src_dir_buffer << src_dir;

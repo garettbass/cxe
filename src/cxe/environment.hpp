@@ -14,6 +14,9 @@ namespace cxe::environment {
 
     public:
 
+        /** /
+        // fails to clean up if variable value is empty string
+        // e.g. "VAR="
         ~variable() {
             verify(_name.size());
             verify(_name_eq_value.size());
@@ -39,6 +42,7 @@ namespace cxe::environment {
             _name.clear();
             _name_eq_value.clear();
         }
+        /**/
 
         template<typename Name, typename Value, typename... Args>
         variable(const Name& name, const Value& value, const Args&... args) {
