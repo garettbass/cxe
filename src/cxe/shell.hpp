@@ -16,6 +16,8 @@
 
 namespace cxe::shell {
 
+    int which(buffer<char>& out, const char* cmd);
+
     #if defined(_WIN32)
     namespace _win32 {
 
@@ -195,7 +197,6 @@ namespace cxe::shell {
 
         #elif defined(__APPLE__)
 
-            echo(cmd);
             verify(false); // todo
             return -1;
 
@@ -253,7 +254,65 @@ namespace cxe::shell {
 
             pid_t pid;
 
-            posix_spawn(&pid, argv[0], nullptr, nullptr, argv, environ);
+            buffer<char> buf;
+            shell::which(buf, argv[0]);
+            const char* path = buf.data();
+
+            int result = posix_spawn(&pid, path, nullptr, nullptr, argv, environ);
+
+            switch (result) {
+                case EINVAL:            //The value specified by file_actions or attrp is
+                print("\nEINVAL");      //invalid.
+                break;
+
+                case E2BIG:             //The number of bytes in the new process's argument list
+                print("\nE2BIG");       //is larger than the system-imposed limit.  This limit
+                break;                  //is specified by the sysctl(3) MIB variable
+                                        //KERN_ARGMAX.
+
+                case EACCES:            //Search permission is denied for a component of the
+                print("\nEACCES");      //path prefix.
+                break;                  //The new process file is not an ordinary file.
+                                        //The new process file mode denies execute permission.
+                                        //The new process file is on a filesystem mounted with
+                                        //execution disabled (MNT_NOEXEC in <sys/mount.h>).
+
+                case EFAULT:            //The new process file is not as long as indicated by
+                print("\nEFAULT");        //the size values in its header.
+                break;                  //Path, argv, or envp point to an illegal address.
+
+                case EIO:               //An I/O error occurred while reading from the file system.
+                print("\nEIO");
+                break;
+
+                case ELOOP:             //Too many symbolic links were encountered in translating
+                print("\nELOOP");       //the pathname.  This is taken to be indicative of a
+                break;                  //looping symbolic link.
+
+                case ENAMETOOLONG:      //A component of a pathname exceeded {NAME_MAX} characters,
+                print("\nENAMETOOLONG");//or an entire path name exceeded {PATH_MAX} characters.
+                break;
+
+                case ENOENT:            //The new process file does not exist.
+                print("\nENOENT");
+                break;
+
+                case ENOEXEC:           //The new process file has the appropriate access permission,
+                print("\nENOEXEC");     //but has an unrecognized format (e.g., an
+                break;                  //invalid magic number in its header).
+
+                case ENOMEM:            //The new process requires more virtual memory than is
+                print("\nENOMEM");      //allowed by the imposed maximum (getrlimit(2)).
+                break;
+
+                case ENOTDIR:           //A component of the path prefix is not a directory.
+                print("\nENOTDIR");
+                break;
+
+                case ETXTBSY:           //The new process file is a pure procedure (shared text)
+                print("\nETXTBSY");     //file that is currently open for writing or reading by
+                break;                  //some process.
+            }
 
             if (pid == waitpid(pid, &status, 0)) return status;
 

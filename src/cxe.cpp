@@ -295,6 +295,7 @@ int main(const int argc, const char* argv[], const char* envp[]) {
         if (not scan::prefix(ctx.cxe_path, cmdline))
             println(cmdline.data());
 
+        fflush(stdout);
         const int status = shell::run_argv(cmd.argv());
         if (status) { exit(status); }
     }

@@ -5,6 +5,10 @@
 #include "scan.hpp"
 #include "verify.hpp"
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 namespace cxe::path {
 
     bool absolute(const char* path) {
@@ -81,6 +85,12 @@ namespace cxe::path {
 
         #endif
     }
+
+    // void get(buffer<char>& path) {
+    //     path.resize(PATH_MAX);
+    //     getcwd(path.data(), path.size());
+    //     path.truncate();
+    // }
 
     bool set(const char* path) {
 
