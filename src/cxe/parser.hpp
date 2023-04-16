@@ -181,7 +181,7 @@ namespace cxe {
             using namespace ::cxe::scan;
             verify(_cli_toks.size());
 
-            append(ctx.compiler_path, _compile);
+            resolve_and_append_arg(ctx.compiler_path, _compile);
 
             if (tokitr itr = _cli_toks) {
                 itr.advance(); // skip cxe name
@@ -198,7 +198,7 @@ namespace cxe {
             const char* src_end = src_itr + ctx.src_path.size();
             while (seek("/",src_itr,src_end) and skip("/",src_itr,src_end));
 
-            append(token_t(src_itr, src_end), _compile);
+            resolve_and_append_arg(token_t(src_itr, src_end), _compile);
 
             if (_should_execute) {
                 if (_execute_cmd.empty()) {
@@ -217,50 +217,54 @@ namespace cxe {
             const token_t t = itr.read();
             verify(t.size());
 
-            if (equals("-help",t) or equals("--help",t))
-                return puts(USAGE), exit(1);
+            if (const bool is_compile_cmd = &cmd == &_compile) {
+                if (equals("-help",t) or equals("--help",t))
+                    return puts(USAGE), exit(1);
 
-            if (equals("-if",t))
-                return parse_if(itr, cmd);
+                if (equals("-if",t))
+                    return parse_if(itr, cmd);
 
-            if (equals("--",t)) {
-                _should_execute = true;
-                while (itr) parse_arg(itr, _execute_args);
-                return;
-            }
+                if (equals("--",t)) {
+                    _should_execute = true;
+                    while (itr) parse_arg(itr, _execute_args);
+                    return;
+                }
 
-            if (equals("-pre",t)) {
-                parse_block(itr, _pre_compile.append());
-                return;
-            }
+                if (equals("-pre",t)) {
+                    parse_block(itr, _pre_compile.append());
+                    return;
+                }
 
-            if (equals("-post",t)) {
-                parse_block(itr, _post_compile.append());
-                return;
-            }
+                if (equals("-post",t)) {
+                    parse_block(itr, _post_compile.append());
+                    return;
+                }
 
-            if (&cmd == &_compile) {
                 if (prefix("--output",t) or prefix("-o",t)) {
                     parse_output(t, itr, cmd);
-                    append(t, cmd);
+                    resolve_and_append_arg(t, cmd);
                     return;
                 }
             }
 
-            append(t, cmd);
+            resolve_and_append_arg(t, cmd);
         }
 
         void parse_output(const token_t& t, const tokitr& itr, command& cmd) {
             using namespace ::cxe::scan;
 
             token_t a = t;
-            
+
+            if (prefix("-objcmd-",a) or prefix("-object-",a)) {
+                return; // red herring
+            }
+
             if (skip("--output=",a)) {
                 // --output=<file>
                 if (not _execute_cmd.empty())
                     return error(1,at(t),"redundant output option");
 
-                append(a, _execute_cmd);
+                resolve_execute_cmd(a);
                 return;
             }
 
@@ -270,12 +274,8 @@ namespace cxe {
                     return error(1,at(t),"expected output path");
 
                 token_t b = itr.peek();
-                append(b, _execute_cmd);
+                resolve_execute_cmd(b);
                 return;
-            }
-
-            if (prefix("-objcmd-",a) or prefix("-object-",a)) {
-                return; // red herring
             }
 
             if (skip("-o",a)) {
@@ -283,7 +283,7 @@ namespace cxe {
                 if (a.empty())
                     return error(1,at(t),"expected output path");
 
-                append(a, _execute_cmd);
+                resolve_execute_cmd(a);
                 return;
             }
         }
@@ -441,12 +441,30 @@ namespace cxe {
             return nullptr;
         }
 
-        const char* append(const token_t& src, command& cmd) {
-            const buffer<char> dst = resolve(src);
-            return cmd.append(dst);
+        const char* resolve_and_append_arg(const token_t& src, command& cmd) {
+            const buffer<char> arg = resolve_arg(src);
+            return cmd.append(arg);
         }
 
-        buffer<char> resolve(const token_t& src) {
+        void resolve_execute_cmd(const token_t& src) {
+            const buffer<char> arg = resolve_arg(src);
+
+            size_t dir_size = 0;
+            for (size_t i = 0; i < arg.size(); ++i) {
+                if (arg[i] == '/') dir_size = i;
+            }
+
+            const token_t dir { arg.data(), dir_size };
+            _execute_cmd.dir(dir);
+
+            const size_t exe_index = dir_size + 1;
+            const size_t exe_size = arg.size() - exe_index;
+            const token_t exe { &arg[exe_index], exe_size };
+
+            _execute_cmd.append(exe);
+        }
+
+        buffer<char> resolve_arg(const token_t& src) {
             using namespace ::cxe::scan;
             buffer<char> buf; buf << src;
 

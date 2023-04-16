@@ -20,6 +20,8 @@ namespace cxe {
 
         using this_t = command;
 
+        buffer<char> _dir;
+
         buffer<char*> _argv;
 
         static char* argalloc(const char* src, const size_t len) {
@@ -37,7 +39,9 @@ namespace cxe {
 
         command() = default;
 
-        command(this_t&& src) : _argv(std::move(src._argv)) { reset(src); }
+        command(this_t&& src)
+        : _dir(std::move(src._dir))
+        , _argv(std::move(src._argv)) { reset(src); }
 
         this_t& operator=(this_t&& src) { return move(this, src); }
 
@@ -48,6 +52,11 @@ namespace cxe {
         auto begin() { return _argv.begin(); }
 
         auto end() { return _argv.end(); }
+
+        const char* dir() { return _dir.data(); }
+
+        template<typename Src>
+        void dir(const Src& src) { verify(_dir.empty()); _dir << src; }
 
         char** argv() { return _argv.data(); }
 

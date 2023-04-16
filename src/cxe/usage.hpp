@@ -16,7 +16,7 @@ Example:
 
     /*cxe{
         -std=c++20
-        -I$VULKAN_SDK/include
+        -I$VULKAN_SDK/Include
         -if (--target=[windows]) { # options if compiling for Windows
             -lgdi32 -luser32 -lshell32
             -o ../bin/windows/hello.exe
@@ -33,13 +33,13 @@ New lines and # or //-prefixed comments within this block are ignored by cxe,
 so the above example is interpreted as though these options were provided on the
 command line:
 
-    -std=c++20 -I$VULKAN_SDK/include -lglfw3 <file>
+    -std=c++20 -I$VULKAN_SDK/Include -lglfw3 <file>
 
 If target "--target=" option was provided on the command line, or the
 effective compilation target determined by CC or CXX, contains the substring
 "windows", then the full set of options becomes:
 
-    -std=c++20 -I$VULKAN_SDK/include -lgdi32 -luser32 -lshell32 \
+    -std=c++20 -I$VULKAN_SDK/Include -lgdi32 -luser32 -lshell32 \
     --ouput=../bin/windows/hello.exe -lglfw3 <file>
 
 OPTIONS:

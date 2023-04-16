@@ -296,6 +296,12 @@ int main(const int argc, const char* argv[], const char* envp[]) {
             println(cmdline.data());
 
         fflush(stdout);
+
+        // change directory before executing command
+        // if cmd.dir() is non-empty
+        if (const char* cmd_dir = cmd.dir(); cmd_dir[0])
+            path::set(cmd_dir);
+
         const int status = shell::run_argv(cmd.argv());
         if (status) { exit(status); }
     }
