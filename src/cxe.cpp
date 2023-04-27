@@ -9,11 +9,6 @@
     "$@"; \
 exit $?
 
-#if defined(_WIN32)
-#include <direct.h>
-#include <process.h>
-#endif
-
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>

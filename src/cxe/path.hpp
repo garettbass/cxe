@@ -5,8 +5,10 @@
 #include "scan.hpp"
 #include "verify.hpp"
 
-#ifndef _WIN32
-#include <unistd.h>
+#ifdef _WIN32
+    #include <direct.h> // _chdir
+#else
+    #include <unistd.h> // chdir
 #endif
 
 namespace cxe::path {
